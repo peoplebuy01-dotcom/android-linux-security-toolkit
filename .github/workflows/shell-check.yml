@@ -1,0 +1,19 @@
+name: Shell script checks
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  bash-syntax:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Bash syntax
+        run: |
+          set -e
+          for file in scripts/*.sh; do
+            bash -n "$file"
+            echo "Syntax OK: $file"
+          done
