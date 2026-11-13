@@ -45,31 +45,43 @@ Examples assume Bash. Paths and package managers vary by distribution.
 
 ## Permissions and users
 
-`whoami`, `id`, and `groups` inspect identity. `chmod` changes mode bits; `chown` changes ownership; `sudo` runs privileged commands; `passwd` changes a password.
+| Command | Example | Purpose | Risk |
+|---|---|---|---|
+| `whoami` | `whoami` | Current username | Low |
+| `id` | `id` | UID, GID, groups | Low |
+| `groups` | `groups` | Group membership | Low |
+| `chmod` | `chmod u+x script.sh` | Change permissions | Medium |
+| `chown` | `chown user:group file` | Change owner/group | Medium/High |
+| `sudo` | `sudo -l` | Inspect permitted privilege rules | Low; running privileged commands is high risk |
+| `passwd` | `passwd` | Change your password interactively | Medium |
 
-```bash
-whoami
-id
-groups
-chmod u+x my-script.sh
-```
-
-Risk: changing permissions/ownership can expose files or break services. Avoid broad recursive permission changes such as `chmod -R 777`.
+Risk: changing permissions/ownership can expose files or break services. Avoid broad recursive permission changes such as `chmod -R 777`. Never paste passwords into commands or shell history.
 
 ## Storage and processes
 
-`lsblk`, `blkid`, `df -h`, and `du -sh PATH` inspect storage. `mount` and `umount` change mount state. `lsof` lists open files. `kill PID` requests process termination; `pkill NAME` matches process names.
+| Command | Example | Purpose | Risk |
+|---|---|---|---|
+| `lsblk` | `lsblk -f` | Block-device overview | Low |
+| `blkid` | `sudo blkid` | Filesystem identifiers | Low; sudo may be needed |
+| `mount` | `mount` | Show mounted filesystems | Low |
+| `umount` | `umount /mnt/usb` | Unmount a known mount | High if busy/wrong target |
+| `lsof` | `lsof -i` | Open files/network handles | Low; output may be sensitive |
+| `kill` | `kill -TERM PID` | Request process stop | Medium/High |
+| `pkill` | `pkill -TERM exact_name` | Stop matching process names | High; matching can be broad |
 
-Risk: unmounting active filesystems or terminating critical processes can interrupt work or cause data loss. Verify target and backups first.
+Risk: unmounting active filesystems or terminating critical processes can interrupt work or cause data loss. Verify exact target and backups first. Avoid `kill -9` as a first response.
 
 ## Package management
 
-- Debian/Ubuntu: `apt`, `dpkg`
-- Termux: `pkg`
-- Arch: `pacman`
-- Fedora: `dnf`
+| Manager | Example | Notes |
+|---|---|---|
+| `apt` | `apt list --installed` | Debian/Ubuntu package manager |
+| `dpkg` | `dpkg -l` | Query installed Debian packages |
+| `pkg` | `pkg list-installed` | Termux package frontend |
+| `pacman` | `pacman -Q` | Arch package query |
+| `dnf` | `dnf list installed` | Fedora package query |
 
-Examples: `sudo apt update`, `apt list --installed`, `pkg list-installed`. Installation/removal modifies the system; inspect package origin and proposed changes.
+Examples: `sudo apt update` refreshes package indexes; it does not itself upgrade packages. Installing/removing software modifies the system; inspect package origin and proposed changes. Never add unknown repositories just to obtain a tool.
 
 ## Text processing and productivity
 
