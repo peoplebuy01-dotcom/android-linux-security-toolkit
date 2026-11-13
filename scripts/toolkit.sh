@@ -1,245 +1,232 @@
 #!/usr/bin/env bash
-# Android & Linux Security Toolkit - Unified safe diagnostics menu
-# Version: 1.0.0
-# Purpose: Read-only local diagnostics and authorized ADB checks.
-# No scanning, exploitation, bypassing, privilege escalation, or destructive actions.
-
+# Android & Linux Security Toolkit | Version 2.0.0
+# English-only responsive dashboard for safe local diagnostics and authorized ADB inspection.
+# No exploitation, bypasses, credential collection, stealth, or destructive actions.
 set -uo pipefail
 IFS=$'\n\t'
+VERSION="2.0.0"
+SCRIPT_DIR="$(cd -- "$(dirname -- "$0")" && pwd)"
+ROOT="$(cd -- "$SCRIPT_DIR/.." && pwd)"
+REPORTS="$ROOT/reports"
 
-VERSION="1.0.0"
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-REPO_ROOT="$(cd -- "${SCRIPT_DIR}/.." && pwd)"
-APP_NAME="ANDROID • LINUX SECURITY TOOLKIT"
-
-# Terminal colors (disabled automatically when output is not a terminal).
 if [[ -t 1 ]]; then
-  C_RESET=$'\033[0m'; C_BOLD=$'\033[1m'; C_CYAN=$'\033[36m'
-  C_GREEN=$'\033[32m'; C_YELLOW=$'\033[33m'; C_RED=$'\033[31m'
-  C_BLUE=$'\033[34m'; C_DIM=$'\033[2m'
-else
-  C_RESET=""; C_BOLD=""; C_CYAN=""; C_GREEN=""
-  C_YELLOW=""; C_RED=""; C_BLUE=""; C_DIM=""
-fi
-
-line() { printf '%s\n' "────────────────────────────────────────────────────────────"; }
-header() {
-  clear 2>/dev/null || true
-  printf '%s' "$C_CYAN"
-  printf '  █████╗ ███╗   ██╗██████╗ ██████╗  ██████╗ ██╗██████╗\n'
-  printf ' ██╔══██╗████╗  ██║██╔══██╗██╔══██╗██╔═══██╗██║██╔══██╗\n'
-  printf ' ███████║██╔██╗ ██║██║  ██║██████╔╝██║   ██║██║██║  ██║\n'
-  printf ' ██╔══██║██║╚██╗██║██║  ██║██╔══██╗██║   ██║██║██║  ██║\n'
-  printf ' ██║  ██║██║ ╚████║██████╔╝██║  ██║╚██████╔╝██║██████╔╝\n'
-  printf ' ╚═╝  ╚═╝╚═╝  ╚═══╝╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚═╝╚═════╝\n'
-  printf '%s' "$C_RESET"
-  printf '%s%s  %s%s\n' "$C_BOLD" "$C_CYAN" "$APP_NAME" "$C_RESET"
-  printf '  %sVersion %s | Defensive diagnostics | Hindi + English%s\n' "$C_DIM" "$VERSION" "$C_RESET"
-  line
+  R=$'\033[0m'; B=$'\033[1m'; C=$'\033[36m'; G=$'\033[32m'; Y=$'\033[33m'; E=$'\033[31m'; D=$'\033[2m'
+else R=""; B=""; C=""; G=""; Y=""; E=""; D=""; fi
+has(){ command -v "$1" >/dev/null 2>&1; }
+width(){
+  local n=80
+  if has tput && [[ -t 1 ]]; then n="$(tput cols 2>/dev/null || echo 80)"; fi
+  [[ "$n" =~ ^[0-9]+$ ]] || n=80
+  ((n<52)) && n=52
+  ((n>100)) && n=100
+  printf '%s' "$n"
 }
-say_ok()   { printf '%s[OK]%s %s\n' "$C_GREEN" "$C_RESET" "$*"; }
-say_info() { printf '%s[INFO]%s %s\n' "$C_CYAN" "$C_RESET" "$*"; }
-say_warn() { printf '%s[NOTE]%s %s\n' "$C_YELLOW" "$C_RESET" "$*"; }
-say_err()  { printf '%s[ERROR]%s %s\n' "$C_RED" "$C_RESET" "$*"; }
-pause() { printf '\n'; read -r -p "Enter दबाएँ menu पर लौटने के लिए..." _ || true; }
-have() { command -v "$1" >/dev/null 2>&1; }
-
-show_system_info() {
-  header
-  printf '%sSYSTEM INFORMATION / सिस्टम जानकारी%s\n\n' "$C_BOLD" "$C_RESET"
-  printf 'OS: %s\n' "$(uname -s 2>/dev/null || printf 'Unknown')"
-  printf 'Kernel: %s\n' "$(uname -r 2>/dev/null || printf 'Unknown')"
-  printf 'Architecture: %s\n' "$(uname -m 2>/dev/null || printf 'Unknown')"
-  if have hostname; then printf 'Hostname: %s\n' "$(hostname 2>/dev/null || printf 'Unavailable')"; fi
-  if have uptime; then printf 'Uptime: '; uptime 2>/dev/null || true; fi
-  if have getprop; then
-    printf '\nAndroid properties:\n'
-    printf 'Manufacturer: '; getprop ro.product.manufacturer 2>/dev/null || true
-    printf 'Model: '; getprop ro.product.model 2>/dev/null || true
-    printf 'Android: '; getprop ro.build.version.release 2>/dev/null || true
-    printf 'SDK: '; getprop ro.build.version.sdk 2>/dev/null || true
-  fi
-  printf '\nMemory:\n'
-  if have free; then free -h; elif [[ -r /proc/meminfo ]]; then head -n 8 /proc/meminfo; else say_warn "Memory details unavailable."; fi
-  say_ok "Read-only system report complete."
+W="$(width)"; CW=$((W-4))
+rule(){ printf '%*s\n' "$W" '' | tr ' ' '-'; }
+wrap(){ if has fold; then printf '%s\n' "$*" | fold -s -w "$CW"; else printf '%s\n' "$*"; fi; }
+ok(){ printf '%s[OK]%s ' "$G" "$R"; wrap "$*"; }
+note(){ printf '%s[NOTE]%s ' "$Y" "$R"; wrap "$*"; }
+err(){ printf '%s[ERROR]%s ' "$E" "$R"; wrap "$*"; }
+pause(){ printf '\n'; read -r -p "Press Enter to return to the menu..." _ || true; }
+section(){ printf '\n%s%s%s\n' "$B" "$1" "$R"; rule; }
+header(){
+  [[ -t 1 ]] && clear 2>/dev/null || true
+  printf '%s' "$C"
+  if ((W>=72)); then
+    printf '  _____ _   _ ____  ____   ___ ___  ____  _____\n'
+    printf ' |_   _| | | |  _ \|  _ \ / _ \_ _|/ ___|| ____|\n'
+    printf '   | | | |_| | |_) | |_) | | | | | \___ \|  _|\n'
+    printf '   | | |  _  |  __/|  __/| |_| | |___) | |___\n'
+    printf '   |_| |_| |_|_|   |_|    \___/|____/|_____|\n'
+  else printf '  [ A L S T ]\n'; fi
+  printf '%s%sANDROID & LINUX SECURITY TOOLKIT%s\n' "$R" "$B" "$R"
+  printf '%sVersion %s | Defensive diagnostics | English edition%s\n' "$D" "$VERSION" "$R"
+  rule
 }
-
-show_storage() {
-  header
-  printf '%sSTORAGE REPORT / स्टोरेज रिपोर्ट%s\n\n' "$C_BOLD" "$C_RESET"
-  if have df; then df -h; else say_err "df command उपलब्ध नहीं है."; fi
-  printf '\nRepository size:\n'
-  if have du; then du -sh "$REPO_ROOT" 2>/dev/null || say_warn "Folder size नहीं मिल पाया."; fi
-  say_ok "कोई file delete या modify नहीं की गई."
+system_info(){
+  header; section "SYSTEM OVERVIEW"
+  printf 'Operating system : %s\n' "$(uname -s 2>/dev/null || echo Unknown)"
+  printf 'Kernel           : %s\n' "$(uname -r 2>/dev/null || echo Unknown)"
+  printf 'Architecture     : %s\n' "$(uname -m 2>/dev/null || echo Unknown)"
+  printf 'Hostname         : %s\n' "$(hostname 2>/dev/null || echo Unknown)"
+  if [[ -r /etc/os-release ]]; then . /etc/os-release; printf 'Distribution     : %s\n' "$PRETTY_NAME"; fi
+  if has getprop; then
+    printf 'Android maker    : %s\n' "$(getprop ro.product.manufacturer 2>/dev/null)"
+    printf 'Android model    : %s\n' "$(getprop ro.product.model 2>/dev/null)"
+    printf 'Android version  : %s\n' "$(getprop ro.build.version.release 2>/dev/null)"
+    printf 'Android SDK      : %s\n' "$(getprop ro.build.version.sdk 2>/dev/null)"
+  fi
+  if has uptime; then printf 'Uptime           : '; uptime 2>/dev/null || true; fi
+  ok "System information collected."
 }
-
-show_processes() {
-  header
-  printf '%sPROCESS SNAPSHOT / चल रहे प्रोग्राम%s\n\n' "$C_BOLD" "$C_RESET"
-  if have ps; then
-    if ps -eo pid,comm,%cpu,%mem --sort=-%cpu >/dev/null 2>&1; then
-      ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 16
-    else
-      ps | head -n 20
-    fi
-  else
-    say_err "ps command उपलब्ध नहीं है."
-  fi
-  say_ok "यह केवल एक snapshot है; कोई process बंद नहीं किया गया."
+cpu_memory(){
+  header; section "CPU AND MEMORY"
+  if [[ -r /proc/cpuinfo ]]; then
+    awk -F: '/model name|Hardware|Processor/ {gsub(/^[ \t]+/,"",$2); print "CPU model: " $2; exit}' /proc/cpuinfo
+    printf 'Logical CPUs: '; if has nproc; then nproc; else grep -c '^processor' /proc/cpuinfo 2>/dev/null || echo Unknown; fi
+  else note "CPU details unavailable in this environment."; fi
+  if has free; then free -h; elif [[ -r /proc/meminfo ]]; then head -n 10 /proc/meminfo; else note "Memory details unavailable."; fi
+  ok "CPU and memory report complete."
 }
-
-show_network() {
-  header
-  printf '%sLOCAL NETWORK OVERVIEW / नेटवर्क जानकारी%s\n\n' "$C_BOLD" "$C_RESET"
-  if have ip; then
-    printf '%sNetwork interfaces:%s\n' "$C_BOLD" "$C_RESET"
-    ip -brief address 2>/dev/null || ip address 2>/dev/null || true
-  else
-    say_warn "ip command नहीं मिला."
-  fi
-  printf '\n'
-  if have ss; then
-    printf '%sListening sockets (local view):%s\n' "$C_BOLD" "$C_RESET"
-    ss -tuln 2>/dev/null || true
-  else
-    say_warn "ss command नहीं मिला."
-  fi
-  say_warn "यह local जानकारी है; कोई network scan या packet capture नहीं किया गया."
+storage(){
+  header; section "STORAGE AND FILESYSTEMS"
+  if has df; then df -h; else note "df is not installed."; fi
+  printf '\nRepository size:\n'; if has du; then du -sh "$ROOT" 2>/dev/null || true; fi
+  ok "Read-only storage report complete."
 }
-
-adb_ready() {
-  if ! have adb; then
-    say_err "ADB नहीं मिला. Official Android SDK Platform Tools install करें."
-    return 1
-  fi
-  local state
-  state="$(adb get-state 2>/dev/null || true)"
-  if [[ "$state" != "device" ]]; then
-    say_warn "Authorized ADB device नहीं मिला. अपने फोन पर USB debugging और RSA prompt जाँचें."
-    adb devices -l 2>/dev/null || true
-    return 1
-  fi
+battery(){
+  header; section "BATTERY STATUS"
+  if has termux-battery-status; then termux-battery-status 2>/dev/null || note "Termux:API permission may be required."
+  elif has dumpsys; then dumpsys battery 2>/dev/null || note "Battery service unavailable."
+  else note "Battery information is not exposed on this platform."; fi
+}
+processes(){
+  header; section "PROCESS SNAPSHOT"
+  if ! has ps; then err "ps is unavailable."; return; fi
+  if ps -eo pid,comm,%cpu,%mem --sort=-%cpu >/dev/null 2>&1; then ps -eo pid,comm,%cpu,%mem --sort=-%cpu | head -n 18
+  else ps | head -n 22; fi
+  ok "Snapshot only; no process was stopped."
+}
+network(){
+  header; section "NETWORK INTERFACES, ROUTES AND DNS"
+  if has ip; then
+    printf 'Interfaces:\n'; ip -brief address 2>/dev/null || ip address 2>/dev/null || true
+    printf '\nRoutes:\n'; ip route 2>/dev/null || ip -6 route 2>/dev/null || true
+  elif has ifconfig; then ifconfig 2>/dev/null || true
+  else note "Install iproute2 or net-tools to view interfaces."; fi
+  printf '\nDNS:\n'
+  if [[ -r /etc/resolv.conf ]]; then awk '/^nameserver/ {print}' /etc/resolv.conf
+  elif has getprop; then getprop | grep -E '\[net\.dns[0-9]*\]' || note "DNS properties unavailable."
+  else note "DNS configuration unavailable."; fi
+  note "Local configuration only. No hosts are scanned."
+}
+sockets(){
+  header; section "LOCAL LISTENING SOCKETS"
+  if has ss; then ss -tuln 2>/dev/null || true
+  elif has netstat; then netstat -tuln 2>/dev/null || true
+  else note "Install iproute2 (ss) or net-tools (netstat)."; fi
+  note "Local socket listing only; no network scan."
+}
+connectivity(){
+  header; section "BASIC HTTPS CONNECTIVITY"
+  if has curl; then
+    if curl -I --connect-timeout 5 --max-time 8 -sS https://example.com/ >/dev/null; then ok "HTTPS request to example.com succeeded."
+    else note "HTTPS request failed. Check connection, DNS, date/time, or restrictions."; fi
+  elif has ping; then
+    ping -c 1 -W 3 1.1.1.1 2>/dev/null && ok "One ping reply received." || note "Ping failed or ICMP is blocked."
+  else note "Install curl for a basic HTTPS check."; fi
+  note "Only one basic connectivity request is made."
+}
+adb_ready(){
+  if ! has adb; then err "ADB is not installed. Use official Android SDK Platform Tools."; return 1; fi
+  local s; s="$(adb get-state 2>/dev/null || true)"
+  if [[ "$s" != "device" ]]; then note "No authorized ADB device. Connect your own device and approve its RSA prompt."; adb devices -l 2>/dev/null || true; return 1; fi
   return 0
 }
-
-show_adb_devices() {
-  header
-  printf '%sADB CONNECTION CHECK%s\n\n' "$C_BOLD" "$C_RESET"
-  if ! have adb; then say_err "ADB उपलब्ध नहीं है."; return; fi
-  adb version 2>/dev/null || true
-  printf '\nConnected devices:\n'
-  adb devices -l 2>/dev/null || true
-  say_warn "केवल अपने डिवाइस को authorize करें."
+adb_status(){
+  header; section "ADB CONNECTION STATUS"
+  if ! has adb; then err "ADB is not installed."; return; fi
+  adb version 2>/dev/null || true; printf '\nConnected devices:\n'; adb devices -l 2>/dev/null || true
+  note "Authorize only devices you own or administer."
 }
-
-show_android_info() {
-  header
-  printf '%sANDROID DEVICE DETAILS%s\n\n' "$C_BOLD" "$C_RESET"
+android_info(){
+  header; section "ANDROID DEVICE INFORMATION"
   if ! adb_ready; then return; fi
-  local prop
-  for prop in ro.product.manufacturer ro.product.model ro.build.version.release ro.build.version.sdk; do
-    printf '%-32s : ' "$prop"
-    adb shell getprop "$prop" 2>/dev/null | tr -d '\r' || true
+  local p
+  for p in ro.product.manufacturer ro.product.model ro.product.device ro.build.version.release ro.build.version.sdk ro.build.version.security_patch; do
+    printf '%-34s : ' "$p"; adb shell getprop "$p" 2>/dev/null | tr -d '\r' || true
   done
-  say_ok "केवल basic properties पढ़ी गईं."
+  ok "Read-only Android properties retrieved."
 }
-
-collect_logs() {
-  header
-  printf '%sANDROID LOG COLLECTION%s\n\n' "$C_BOLD" "$C_RESET"
-  say_warn "Logs में निजी जानकारी, notifications या identifiers हो सकते हैं."
+android_battery(){
+  header; section "ANDROID BATTERY DIAGNOSTICS"
+  if ! adb_ready; then return; fi
+  adb shell dumpsys battery 2>/dev/null || note "Battery service unavailable."
+}
+app_list(){
+  header; section "INSTALLED USER APPLICATIONS"
+  if ! adb_ready; then return; fi
+  adb shell pm list packages -3 2>/dev/null | sort || note "Package list unavailable."
+  note "Package names only. App data is not accessed."
+}
+logs(){
+  header; section "ANDROID DIAGNOSTIC LOG CAPTURE"
+  note "Logs may contain private notifications, identifiers, and app data."
   if ! adb_ready; then return; fi
   local answer out
-  read -r -p "अपने device से अधिकतम 30 सेकंड के logs save करें? Type YES: " answer || true
-  if [[ "$answer" != "YES" ]]; then say_info "Cancelled."; return; fi
-  if ! have timeout; then
-    say_err "timeout command उपलब्ध नहीं है; safety के लिए log capture नहीं किया."
-    return
-  fi
-  out="$REPO_ROOT/android-log-$(date +%Y%m%d-%H%M%S).txt"
-  say_info "अधिकतम 30 सेकंड capture हो रहा है..."
-  timeout 30 adb logcat -v time > "$out" 2>&1 || true
+  read -r -p "Capture up to 20 seconds of logs from your own device? Type YES: " answer || true
+  [[ "$answer" == "YES" ]] || { note "Cancelled."; return; }
+  if ! has timeout; then err "timeout utility missing; capture cancelled."; return; fi
+  mkdir -p "$REPORTS" || { err "Cannot create reports folder."; return; }
+  out="$REPORTS/android-log-$(date +%Y%m%d-%H%M%S).txt"
+  (umask 077; timeout 20 adb logcat -v time > "$out" 2>&1) || true
   chmod 600 "$out" 2>/dev/null || true
-  say_ok "Log file local रूप से save हुई: $out"
-  say_warn "इसे share करने से पहले redact करें; काम पूरा होने पर delete करें."
+  ok "Log saved locally: $out"; note "Redact private data before sharing."
 }
-
-show_tool_hints() {
-  header
-  printf '%sPACKAGE / TOOL INSTALLATION HELP%s\n\n' "$C_BOLD" "$C_RESET"
-  if have pkg; then
-    printf 'Termux suggestion:\n  pkg update && pkg install git bash coreutils procps iproute2 android-tools\n'
-  elif have apt-get; then
-    printf 'Debian/Ubuntu suggestion:\n  sudo apt update && sudo apt install git bash coreutils procps iproute2 android-tools\n'
-  elif have dnf; then
-    printf 'Fedora suggestion:\n  sudo dnf install git bash coreutils procps iproute android-tools\n'
-  elif have pacman; then
-    printf 'Arch suggestion:\n  sudo pacman -S git bash coreutils procps iproute2 android-tools\n'
-  else
-    say_warn "Package manager पहचाना नहीं गया. अपने OS की official documentation देखें."
-  fi
-  say_warn "यह केवल सुझाव है. कोई package install नहीं किया गया."
+dependencies(){
+  header; section "DEPENDENCY CHECK"
+  local required="bash uname df du ps awk grep sed sort head tr date find fold" optional="ip ss adb curl timeout free getprop termux-battery-status" x missing=0
+  printf 'Required commands:\n'
+  for x in $required; do if has "$x"; then printf ' [OK] %s\n' "$x"; else printf ' [MISSING] %s\n' "$x"; missing=1; fi; done
+  printf '\nOptional commands:\n'
+  for x in $optional; do if has "$x"; then printf ' [AVAILABLE] %s\n' "$x"; else printf ' [NOT FOUND] %s\n' "$x"; fi; done
+  ((missing==0)) && ok "Required command check complete." || note "Some utilities are missing; related features may not work."
 }
-
-show_guides() {
-  header
-  printf '%sDOCUMENTATION / सीखने की गाइड%s\n\n' "$C_BOLD" "$C_RESET"
-  printf 'Repository: %s\n\n' "$REPO_ROOT"
-  if [[ -d "$REPO_ROOT/docs" ]]; then
-    find "$REPO_ROOT/docs" -maxdepth 1 -type f -name '*.md' -print 2>/dev/null | sort
-  else
-    say_warn "docs folder नहीं मिला."
-  fi
-  printf '\nREADME: %s/README.md\n' "$REPO_ROOT"
+validate_scripts(){
+  header; section "PROJECT SHELL SCRIPT VALIDATION"
+  local f count=0 errors=0
+  shopt -s nullglob
+  for f in "$ROOT"/scripts/*.sh; do
+    ((count+=1))
+    if bash -n "$f" 2>/dev/null; then printf '%s[PASS]%s %s\n' "$G" "$R" "$(basename "$f")"
+    else printf '%s[FAIL]%s %s\n' "$E" "$R" "$(basename "$f")"; ((errors+=1)); fi
+  done
+  shopt -u nullglob
+  printf '\nChecked: %s | Errors: %s\n' "$count" "$errors"
+  ((count>0 && errors==0)) && ok "All discovered scripts passed Bash syntax validation." || note "Review any failed scripts."
 }
-
-run_all_reports() {
-  show_system_info
-  pause
-  show_storage
-  pause
-  show_processes
-  pause
-  show_network
-  pause
-  show_adb_devices
-  pause
-  show_android_info
+install_help(){
+  header; section "OPTIONAL PACKAGE INSTALLATION GUIDE"
+  if has pkg; then printf 'Termux:\n pkg update\n pkg install bash coreutils procps iproute2 curl android-tools\n'
+  elif has apt-get; then printf 'Debian/Ubuntu:\n sudo apt update\n sudo apt install bash coreutils procps iproute2 curl android-tools\n'
+  elif has dnf; then printf 'Fedora:\n sudo dnf install bash coreutils procps iproute curl android-tools\n'
+  elif has pacman; then printf 'Arch:\n sudo pacman -S bash coreutils procps iproute2 curl android-tools\n'
+  else note "Package manager not recognized. Check official OS documentation."; fi
+  note "Suggestions only. No packages are installed by this toolkit."
 }
-
-main_menu() {
+docs(){
+  header; section "DOCUMENTATION FILES"
+  if [[ -d "$ROOT/docs" ]]; then find "$ROOT/docs" -maxdepth 1 -type f -name '*.md' -print 2>/dev/null | sort
+  else note "Documentation folder not found."; fi
+  printf '\nMain README: %s/README.md\nScript guide: %s/scripts/README.md\n' "$ROOT" "$ROOT"
+}
+safe_suite(){
+  system_info; pause; cpu_memory; pause; storage; pause; processes; pause; network; pause; sockets; pause; dependencies; pause; validate_scripts
+}
+main(){
   local choice
   while true; do
-    header
-    printf '%sMAIN MENU / मुख्य मेन्यू%s\n' "$C_BOLD" "$C_RESET"
-    printf '  1) System information       सिस्टम जानकारी\n'
-    printf '  2) Storage report           स्टोरेज रिपोर्ट\n'
-    printf '  3) Process snapshot         चल रहे processes\n'
-    printf '  4) Local network overview   नेटवर्क जानकारी\n'
-    printf '  5) ADB connection check     ADB कनेक्शन\n'
-    printf '  6) Android device details   Android जानकारी\n'
-    printf '  7) Collect Android logs     Logs (confirmation required)\n'
-    printf '  8) Tool installation hints  Tools install help\n'
-    printf '  9) Browse documentation    गाइड की सूची\n'
-    printf ' 10) Run safe reports         सुरक्षित रिपोर्ट एक-एक करके\n'
-    printf '  0) Exit                     बाहर निकलें\n'
-    line
-    read -r -p "अपना विकल्प चुनें [0-10]: " choice || choice="0"
+    header; section "MAIN MENU"
+    printf ' 1   System overview\n 2   CPU and memory report\n 3   Storage and filesystems\n'
+    printf ' 4   Battery status (local API)\n 5   Process snapshot\n 6   Network interfaces, routes and DNS\n'
+    printf ' 7   Local listening sockets\n 8   Basic HTTPS connectivity check\n 9   ADB connection status\n'
+    printf '10   Android device information\n11   Android battery diagnostics (ADB)\n'
+    printf '12   Installed user application list (ADB)\n13   Capture Android logs (explicit consent)\n'
+    printf '14   Dependency and environment check\n15   Validate project shell scripts\n'
+    printf '16   Optional package installation guide\n17   Browse documentation files\n'
+    printf '18   Run safe diagnostics suite\n 0   Exit\n'
+    rule
+    read -r -p "Select an option [0-18]: " choice || choice=0
     case "$choice" in
-      1) show_system_info; pause ;;
-      2) show_storage; pause ;;
-      3) show_processes; pause ;;
-      4) show_network; pause ;;
-      5) show_adb_devices; pause ;;
-      6) show_android_info; pause ;;
-      7) collect_logs; pause ;;
-      8) show_tool_hints; pause ;;
-      9) show_guides; pause ;;
-      10) run_all_reports; pause ;;
-      0) printf '\n%sToolkit बंद किया गया. धन्यवाद!%s\n' "$C_GREEN" "$C_RESET"; break ;;
-      *) say_err "गलत विकल्प. 0 से 10 में चुनें."; sleep 1 ;;
+      1) system_info; pause ;; 2) cpu_memory; pause ;; 3) storage; pause ;;
+      4) battery; pause ;; 5) processes; pause ;; 6) network; pause ;;
+      7) sockets; pause ;; 8) connectivity; pause ;; 9) adb_status; pause ;;
+      10) android_info; pause ;; 11) android_battery; pause ;; 12) app_list; pause ;;
+      13) logs; pause ;; 14) dependencies; pause ;; 15) validate_scripts; pause ;;
+      16) install_help; pause ;; 17) docs; pause ;; 18) safe_suite; pause ;;
+      0) printf '\n%sToolkit closed. Thank you.%s\n' "$G" "$R"; break ;;
+      *) err "Invalid choice. Enter a number from 0 to 18."; sleep 1 ;;
     esac
   done
 }
-
-main_menu
+main
