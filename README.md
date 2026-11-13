@@ -15,10 +15,15 @@
 5. [Termux Guide](docs/TERMUX-GUIDE.md)
 6. [Cybersecurity Tools](docs/CYBERSECURITY-TOOLS.md)
 7. [Android Security Lab](docs/ANDROID-SECURITY-LAB.md)
-8. [Fastboot Guide](docs/FASTBOOT-GUIDE.md)
-9. [Troubleshooting](docs/TROUBLESHOOTING.md)
-10. [FAQ](docs/FAQ.md)
-11. [Documentation Index](docs/README.md)
+8. [Android Device Maintenance](docs/ANDROID-DEVICE-MAINTENANCE.md)
+9. [Tool Installation & Usage](docs/TOOLS-INSTALLATION-AND-USAGE.md)
+10. [Networking & TLS Lab](docs/NETWORKING-AND-TLS-LAB.md)
+11. [Fastboot Guide](docs/FASTBOOT-GUIDE.md)
+12. [Learning Roadmap](docs/LEARNING-ROADMAP.md)
+13. [Troubleshooting](docs/TROUBLESHOOTING.md)
+14. [Quality Assurance](docs/QUALITY-ASSURANCE.md)
+15. [FAQ](docs/FAQ.md)
+16. [Documentation Index](docs/README.md)
 
 ## Learning roadmap
 
