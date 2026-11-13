@@ -17,7 +17,7 @@ width(){
   local n=80
   if has tput && [[ -t 1 ]]; then n="$(tput cols 2>/dev/null || echo 80)"; fi
   [[ "$n" =~ ^[0-9]+$ ]] || n=80
-  ((n<52)) && n=52
+  ((n<40)) && n=40
   ((n>100)) && n=100
   printf '%s' "$n"
 }
@@ -40,7 +40,8 @@ header(){
     printf '   |_| |_| |_|_|   |_|    \___/|____/|_____|\n'
   else printf '  [ A L S T ]\n'; fi
   printf '%s%sANDROID & LINUX SECURITY TOOLKIT%s\n' "$R" "$B" "$R"
-  printf '%sVersion %s | Defensive diagnostics | English edition%s\n' "$D" "$VERSION" "$R"
+  printf '%sVersion %s | Defensive diagnostics%s\n' "$D" "$VERSION" "$R"
+  printf '%sEnglish edition%s\n' "$D" "$R"
   rule
 }
 system_info(){
@@ -212,12 +213,12 @@ main(){
   while true; do
     header; section "MAIN MENU"
     printf ' 1   System overview\n 2   CPU and memory report\n 3   Storage and filesystems\n'
-    printf ' 4   Battery status (local API)\n 5   Process snapshot\n 6   Network interfaces, routes and DNS\n'
-    printf ' 7   Local listening sockets\n 8   Basic HTTPS connectivity check\n 9   ADB connection status\n'
-    printf '10   Android device information\n11   Android battery diagnostics (ADB)\n'
-    printf '12   Installed user application list (ADB)\n13   Capture Android logs (explicit consent)\n'
-    printf '14   Dependency and environment check\n15   Validate project shell scripts\n'
-    printf '16   Optional package installation guide\n17   Browse documentation files\n'
+    printf ' 4   Battery status (local API)\n 5   Process snapshot\n 6   Network, routes and DNS\n'
+    printf ' 7   Local listening sockets\n 8   HTTPS connectivity check\n 9   ADB connection status\n'
+    printf '10   Android device information\n11   Android battery diagnostics\n'
+    printf '12   Installed user apps (ADB)\n13   Android log capture (confirm)\n'
+    printf '14   Dependency check\n15   Validate shell scripts\n'
+    printf '16   Package installation guide\n17   Browse documentation\n'
     printf '18   Run safe diagnostics suite\n 0   Exit\n'
     rule
     read -r -p "Select an option [0-18]: " choice || choice=0
