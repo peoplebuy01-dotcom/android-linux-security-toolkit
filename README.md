@@ -1,73 +1,68 @@
 # Android & Linux Security Toolkit
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Docs](https://img.shields.io/badge/Docs-Hindi%20%2B%20English-orange)](docs/) [![安全](https://img.shields.io/badge/Focus-Defensive%20Security-success)](SECURITY.md)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) [![Docs](https://img.shields.io/badge/Docs-Hindi%20%2B%20English-orange)](docs/README.md) [![Focus](https://img.shields.io/badge/Focus-Defensive%20Security-success)](SECURITY.md)
 
-**A bilingual, beginner-to-advanced learning platform for Android administration, Linux operations, and authorized application security testing.**
+**Android, Linux, Termux और authorized cybersecurity सीखने के लिए bilingual learning toolkit.**
 
-यह repository Android और Linux को सुरक्षित तरीके से समझने, diagnostics करने और अपने या स्पष्ट अनुमति वाले lab systems पर security सीखने के लिए है।
+यहाँ से शुरुआत करें — आपको जो सीखना है, उसके सामने दिए गए लिंक पर जाएँ।
 
-## Start here
+## कहाँ क्या मिलेगा? / Quick navigation
 
-1. [Getting Started](docs/GETTING-STARTED.md)
-2. [Installation](docs/INSTALLATION.md)
-3. [Android ADB Guide](docs/ANDROID-ADB-GUIDE.md)
-4. [Linux Command Handbook](docs/LINUX-COMMAND-HANDBOOK.md)
-5. [Termux Guide](docs/TERMUX-GUIDE.md)
-6. [Cybersecurity Tools](docs/CYBERSECURITY-TOOLS.md)
-7. [Android Security Lab](docs/ANDROID-SECURITY-LAB.md)
-8. [Android Device Maintenance](docs/ANDROID-DEVICE-MAINTENANCE.md)
-9. [Tool Installation & Usage](docs/TOOLS-INSTALLATION-AND-USAGE.md)
-10. [Networking & TLS Lab](docs/NETWORKING-AND-TLS-LAB.md)
-11. [Fastboot Guide](docs/FASTBOOT-GUIDE.md)
-12. [Learning Roadmap](docs/LEARNING-ROADMAP.md)
-13. [Troubleshooting](docs/TROUBLESHOOTING.md)
-14. [Quality Assurance](docs/QUALITY-ASSURANCE.md)
-15. [FAQ](docs/FAQ.md)
-16. [Documentation Index](docs/README.md)
+| मुझे क्या करना है? | यहाँ जाएँ |
+|---|---|
+| पहली बार प्रोजेक्ट इस्तेमाल करना | [Getting Started](docs/GETTING-STARTED.md) |
+| Termux सेटअप और कमांड सीखना | [Termux Guide](docs/TERMUX-GUIDE.md) |
+| Android फोन को ADB से देखना | [Android ADB Guide](docs/ANDROID-ADB-GUIDE.md) |
+| Fastboot समझना | [Fastboot Guide](docs/FASTBOOT-GUIDE.md) |
+| Linux कमांड सीखना | [Linux Command Handbook](docs/LINUX-COMMAND-HANDBOOK.md) |
+| Cybersecurity tools समझना | [Cybersecurity Tools](docs/CYBERSECURITY-TOOLS.md) |
+| Android app security lab करना | [Android Security Lab](docs/ANDROID-SECURITY-LAB.md) |
+| नेटवर्क और TLS सीखना | [Networking & TLS Lab](docs/NETWORKING-AND-TLS-LAB.md) |
+| टूल इंस्टॉल/इस्तेमाल करना | [Tools Installation & Usage](docs/TOOLS-INSTALLATION-AND-USAGE.md) |
+| फोन की सामान्य जाँच करना | [Device Maintenance](docs/ANDROID-DEVICE-MAINTENANCE.md) |
+| कमांड/स्क्रिप्ट के उदाहरण देखना | [Examples](examples/README.md) |
+| स्क्रिप्ट चलाना सीखना | [Scripts Index](scripts/README.md) |
+| समस्या का समाधान ढूँढना | [Troubleshooting](docs/TROUBLESHOOTING.md) |
+| पूरा सीखने का क्रम देखना | [Learning Roadmap](docs/LEARNING-ROADMAP.md) |
 
-## Learning roadmap
+## Repository map — कौन-सा folder किस काम का है?
 
-| Level | Topics | Outcome |
-|---|---|---|
-| Beginner | Terminal basics, files, permissions, ADB | Safely inspect your own device |
-| Intermediate | Linux services, networking, logs, APK structure | Diagnose and understand systems |
-| Advanced | Static analysis, TLS, lab instrumentation, DevSecOps | Assess authorized test apps |
+| Folder / File | इसमें क्या है? |
+|---|---|
+| [docs/](docs/README.md) | सभी विषयों की guides, tutorials और labs |
+| [scripts/](scripts/README.md) | अपने डिवाइस/सिस्टम की जाँच करने वाली helper scripts |
+| [examples/](examples/README.md) | सुरक्षित command examples |
+| [.github/workflows/](.github/workflows/) | GitHub पर automated code checks |
+| [SECURITY.md](SECURITY.md) | सुरक्षा नियम और responsible reporting |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | प्रोजेक्ट में योगदान कैसे दें |
+| [CHANGELOG.md](CHANGELOG.md) | बदलावों का रिकॉर्ड |
 
-## Repository map
+## शुरुआत कैसे करें?
 
-- `docs/` — bilingual guides and labs
-- `scripts/` — read-only diagnostic helpers
-- `examples/` — safe command examples
-- `.github/workflows/` — automated quality checks
-
-## Quick start
-
-Linux:
+### 1. Repository डाउनलोड करें
 ```bash
 git clone https://github.com/peoplebuy01-dotcom/android-linux-security-toolkit.git
 cd android-linux-security-toolkit
-bash scripts/linux_system_info.sh
 ```
 
-Termux:
-```bash
-pkg update
-pkg install git bash coreutils android-tools
-git clone https://github.com/peoplebuy01-dotcom/android-linux-security-toolkit.git
-cd android-linux-security-toolkit
-bash scripts/android_device_info.sh
-```
+### 2. पहले यह पढ़ें
+[Getting Started खोलें](docs/GETTING-STARTED.md)
 
-Scripts are diagnostic and do not modify device settings. Some Android information requires USB debugging and an authorized ADB connection.
+### 3. अपने सिस्टम के अनुसार आगे बढ़ें
+- Android + Termux: [Termux Guide](docs/TERMUX-GUIDE.md)
+- Linux computer: [Linux Handbook](docs/LINUX-COMMAND-HANDBOOK.md)
+- Android device diagnostics: [ADB Guide](docs/ANDROID-ADB-GUIDE.md)
+
+## Learning path
+
+1. **Beginner:** Terminal, files, folders और basic commands.
+2. **Intermediate:** ADB, Linux permissions, processes, networking और logs.
+3. **Advanced:** APK structure, static analysis, TLS और authorized lab testing.
 
 ## Safety first
 
-Only test devices, apps, networks, and accounts you own or have explicit permission to assess. Do not use this project to bypass screen locks, FRP, MDM, account protections, or access controls. Never scan public or third-party systems without written authorization. See [SECURITY.md](SECURITY.md).
+केवल अपने डिवाइस, ऐप, अकाउंट और नेटवर्क पर या स्पष्ट अनुमति वाले lab में अभ्यास करें। Screen lock, FRP, MDM, account protection या access controls bypass करने के लिए इस repository का उपयोग न करें। Public/third-party systems को बिना लिखित अनुमति test न करें। [पूरा Security Policy पढ़ें](SECURITY.md).
 
-## Contributing
+## Project policies
 
-Issues, corrections, translations, and safe lab improvements are welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
-
-## License
-
-MIT — see [LICENSE](LICENSE). Third-party tools retain their own licenses and terms.
+[Contributing](CONTRIBUTING.md) · [Code of Conduct](CODE_OF_CONDUCT.md) · [Security](SECURITY.md) · [Changelog](CHANGELOG.md) · [License](LICENSE)
