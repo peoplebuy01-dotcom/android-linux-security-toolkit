@@ -165,11 +165,15 @@ logs(){
 }
 dependencies(){
   header; section "DEPENDENCY CHECK"
-  local required="bash uname df du ps awk grep sed sort head tr date find fold" optional="ip ss adb curl timeout free getprop termux-battery-status" x missing=0
+  local x missing=0
   printf 'Required commands:\n'
-  for x in $required; do if has "$x"; then printf ' [OK] %s\n' "$x"; else printf ' [MISSING] %s\n' "$x"; missing=1; fi; done
+  for x in bash uname df du ps awk grep sed sort head tr date find fold; do
+    if has "$x"; then printf ' [OK] %s\n' "$x"; else printf ' [MISSING] %s\n' "$x"; missing=1; fi
+  done
   printf '\nOptional commands:\n'
-  for x in $optional; do if has "$x"; then printf ' [AVAILABLE] %s\n' "$x"; else printf ' [NOT FOUND] %s\n' "$x"; fi; done
+  for x in ip ss adb curl timeout free getprop termux-battery-status; do
+    if has "$x"; then printf ' [AVAILABLE] %s\n' "$x"; else printf ' [NOT FOUND] %s\n' "$x"; fi
+  done
   ((missing==0)) && ok "Required command check complete." || note "Some utilities are missing; related features may not work."
 }
 validate_scripts(){
