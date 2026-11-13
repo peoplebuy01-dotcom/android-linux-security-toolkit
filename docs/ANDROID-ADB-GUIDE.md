@@ -35,6 +35,36 @@ adb shell df -h /data
 
 Expected output for `adb devices -l` includes a device serial and state such as `device`. If it says `unauthorized`, unlock your own phone and review the RSA prompt.
 
+## Device diagnostics
+
+| Goal | Command | Expected result | Risk |
+|---|---|---|---|
+| Manufacturer/model | `adb shell getprop ro.product.model` | Model string or blank | Low |
+| Android release | `adb shell getprop ro.build.version.release` | Version string | Low |
+| Battery status | `adb shell dumpsys battery` | Battery service fields | Low; device details |
+| Storage | `adb shell df -h` | Mounted filesystems and free space | Low |
+| Packages | `adb shell pm list packages -3` | Third-party package IDs | Low; privacy |
+| Recent logs | `adb logcat -d -t 200` | Recent log lines | Low; logs can be sensitive |
+
+Example: 
+
+```bash
+adb shell dumpsys battery
+adb shell df -h /data
+adb shell pm list packages -3
+```
+
+Output varies by Android release and manufacturer. Some commands may be restricted. Do not remove packages or change device settings based only on diagnostic output.
+
+## File transfer details
+
+```bash
+adb pull /sdcard/Download/report.txt ./report.txt
+adb push ./sample.txt /sdcard/Download/sample.txt
+```
+
+Confirm source and destination before transfer. Pulling copies private data to the computer; pushing can overwrite an existing destination file. Use test files first.
+
 ## Wireless debugging
 
 Use Android's built-in **Wireless debugging** pairing workflow on a trusted private network. Follow the pairing IP/port and pairing code shown on the phone; do not expose ADB ports to the public internet. Disable Wireless debugging when finished.
