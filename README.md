@@ -15,7 +15,10 @@
 5. [Termux Guide](docs/TERMUX-GUIDE.md)
 6. [Cybersecurity Tools](docs/CYBERSECURITY-TOOLS.md)
 7. [Android Security Lab](docs/ANDROID-SECURITY-LAB.md)
-8. [Troubleshooting](docs/TROUBLESHOOTING.md)
+8. [Fastboot Guide](docs/FASTBOOT-GUIDE.md)
+9. [Troubleshooting](docs/TROUBLESHOOTING.md)
+10. [FAQ](docs/FAQ.md)
+11. [Documentation Index](docs/README.md)
 
 ## Learning roadmap
 
@@ -30,7 +33,7 @@
 - `docs/` — bilingual guides and labs
 - `scripts/` — read-only diagnostic helpers
 - `examples/` — safe command examples
-- ` .github/workflows/` — automated quality checks
+- `.github/workflows/` — automated quality checks
 
 ## Quick start
 
