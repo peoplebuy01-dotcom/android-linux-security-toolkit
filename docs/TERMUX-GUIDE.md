@@ -11,7 +11,7 @@ Use official project distribution information: https://termux.dev/ and https://g
 ```bash
 pkg update
 pkg upgrade
-pkg install git bash coreutils procps
+pkg install git bash coreutils procps android-tools
 termux-info
 ```
 
