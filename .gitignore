@@ -1,0 +1,5 @@
+# Local logs and generated reports
+*.log
+android-log-*.txt
+*.tmp
+.DS_Store
