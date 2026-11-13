@@ -47,7 +47,7 @@ bash scripts/linux_system_info.sh
 Termux:
 ```bash
 pkg update
-pkg install git bash coreutils
+pkg install git bash coreutils android-tools
 git clone https://github.com/peoplebuy01-dotcom/android-linux-security-toolkit.git
 cd android-linux-security-toolkit
 bash scripts/android_device_info.sh
